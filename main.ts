@@ -34,10 +34,6 @@ async function main() {
     const searchButton = document.createElement('button')
     searchButton.textContent = 'Search'
 
-    const dataDisplayNode = document.createElement('p')
-    
-
-
     textBox.addEventListener('click', () => {
         if (textBox.value == textBox.defaultValue) {
             textBox.value = ''
@@ -53,9 +49,15 @@ async function main() {
         const pokemonName = textBox.value
         const pokeData = await fetcher.fetchPokemonData(pokemonName)
         const dataDisplay = JSON.stringify(pokeData, null, 4)
-        // console.log(pokeData)
+        console.log(dataDisplay)
 
-        dataDisplayNode.textContent = dataDisplay
+        nameNode.textContent = pokemonName
+        spriteNode.src = pokeData.sprites.front_default // url: string
+
+        for (const pokeDataNode of Array.make(nameNode, spriteNode)) {
+            dataDisplayNode.appendChild(pokeDataNode)
+        }
+
         root.appendChild(dataDisplayNode)
     })
 
@@ -64,7 +66,14 @@ async function main() {
         root.appendChild(child)
     }
 
-    // await helper.addDefaultValueToSearchBox(textBox)
+    const dataDisplayNode = document.createElement('pre') // preformatted
+    // sprite, type, stats, abilities will depend on this node
+
+    const nameNode = document.createElement('h2')
+    const spriteNode = document.createElement('img')
+    const typeNode = document.createElement('p')
+    const statsNode = document.createElement('div')
+    const abilitiesNode = document.createElement('p')
 }
 
 main()
