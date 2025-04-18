@@ -8,11 +8,8 @@ class PokeFetcher {
     }
 
     async fetchPokemonData(pokemonName: string) {
-        // console.log(this.url)
         const pokemonURL = `${this.url}/${pokemonName}`
         const pokemonData = (await fetch(pokemonURL)).json()
-        // const pokemonDataParsed = JSON.parse(pokemonData)
-        // console.log(pokemonData)
         return pokemonData
     }
 }
@@ -48,17 +45,16 @@ async function main() {
     searchButton.addEventListener('click', async () => {
         const pokemonName = textBox.value
         const pokeData = await fetcher.fetchPokemonData(pokemonName)
-        // const dataDisplay = JSON.stringify(pokeData, null, 4)
-        // console.log(dataDisplay)
-
         nameNode.textContent = pokemonName
         spriteNode.src = pokeData.sprites.front_default // url: string
-        // console.log(pokeData.abilities[1].ability.name)
-
         const abilities = parseAbilitiesArr(pokeData.abilities)
-        abilitiesNode.textContent = 'Abilities: ' + join(abilities, ', ')
+        const abilitiesCapitalized = Array.map(abilities, String.capitalize)
+        abilitiesNode.textContent = 'Abilities: ' + join(abilitiesCapitalized, ', ')
+        const types = parseTypesArr(pokeData.types)
+        const typesUpper = Array.map(types, String.toUpperCase)
+        typeNode.textContent = join(typesUpper, ' | ')
 
-        for (const pokeDataNode of Array.make(nameNode, spriteNode, abilitiesNode)) {
+        for (const pokeDataNode of Array.make(nameNode, spriteNode, typeNode, abilitiesNode)) {
             dataDisplayNode.appendChild(pokeDataNode)
         }
 
@@ -100,6 +96,17 @@ function parseAbilitiesArr(abilitiesArray) {
     for (const i of Array.range(0, arrLen - 1)) {
         console.log(abilitiesArray[i])
         res = Array.append(res, abilitiesArray[i].ability.name) // idk why its structured like this
+    }
+    return res
+}
+
+function parseTypesArr(typesArr) {
+    const arrLen = Array.length(typesArr)
+    let res: Array<string> = Array.empty()
+
+    for (const i of Array.range(0, arrLen - 1)) {
+        console.log(typesArr[i])
+        res = Array.append(res, typesArr[i].type.name) // idk why its structured like this
     }
     return res
 }
