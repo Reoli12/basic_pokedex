@@ -12,7 +12,7 @@ class PokeFetcher {
         const pokemonURL = `${this.url}/${pokemonName}`
         const pokemonData = (await fetch(pokemonURL)).json()
         // const pokemonDataParsed = JSON.parse(pokemonData)
-        console.log(pokemonData)
+        // console.log(pokemonData)
         return pokemonData
     }
 }
@@ -48,13 +48,17 @@ async function main() {
     searchButton.addEventListener('click', async () => {
         const pokemonName = textBox.value
         const pokeData = await fetcher.fetchPokemonData(pokemonName)
-        const dataDisplay = JSON.stringify(pokeData, null, 4)
-        console.log(dataDisplay)
+        // const dataDisplay = JSON.stringify(pokeData, null, 4)
+        // console.log(dataDisplay)
 
         nameNode.textContent = pokemonName
         spriteNode.src = pokeData.sprites.front_default // url: string
+        // console.log(pokeData.abilities[1].ability.name)
 
-        for (const pokeDataNode of Array.make(nameNode, spriteNode)) {
+        const abilities = parseAbilitiesArr(pokeData.abilities)
+        abilitiesNode.textContent = 'Abilities: ' + join(abilities, ', ')
+
+        for (const pokeDataNode of Array.make(nameNode, spriteNode, abilitiesNode)) {
             dataDisplayNode.appendChild(pokeDataNode)
         }
 
@@ -74,6 +78,30 @@ async function main() {
     const typeNode = document.createElement('p')
     const statsNode = document.createElement('div')
     const abilitiesNode = document.createElement('p')
+}
+
+function join(strList: string[], separator: string): string {
+    let res = ''
+    for (const elem of strList) {
+        if (res === '' ) {
+            res += elem
+        } 
+        else {
+            res = `${res}${separator}${elem}`
+        }
+    }
+    return res
+}
+
+function parseAbilitiesArr(abilitiesArray) {
+    const arrLen = Array.length(abilitiesArray)
+    let res: Array<string> = Array.empty()
+
+    for (const i of Array.range(0, arrLen - 1)) {
+        console.log(abilitiesArray[i])
+        res = Array.append(res, abilitiesArray[i].ability.name) // idk why its structured like this
+    }
+    return res
 }
 
 main()
