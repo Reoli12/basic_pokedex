@@ -1,4 +1,5 @@
 import { Array, String, HashMap, pipe } from 'effect'
+import { format } from 'effect/Duration'
 
 class PokeFetcher {
     url: string
@@ -24,50 +25,51 @@ async function main() {
     const root = document.querySelector('#root')!
     
     const header = document.createElement('h1')
-    header.textContent = 'pokedex beta'
+        header.textContent = 'pokedex beta'
     const textBox = document.createElement('input')
-    textBox.defaultValue = 'search pokemon here'
+        textBox.defaultValue = 'search pokemon here'
+        textBox.addEventListener('click', () => {
+            if (textBox.value == textBox.defaultValue) {
+                textBox.value = ''
+            }
+        })
+        textBox.addEventListener('focusout', () => {
+            if (textBox.value === '')
+            {
+                textBox.value = textBox.defaultValue
+            }})
     const searchButton = document.createElement('button')
-    searchButton.textContent = 'Search'
+        searchButton.textContent = 'Search'
 
-    textBox.addEventListener('click', () => {
-        if (textBox.value == textBox.defaultValue) {
-            textBox.value = ''
+
+        searchButton.addEventListener('click', async () => {
+            const pokemonName = textBox.value
+            const pokeData = await fetcher.fetchPokemonData(pokemonName)
+
+            nameNode.textContent = pokemonName
+            spriteNode.src = pokeData.sprites.front_default // url: string
+            const abilities = parseAbilitiesArr(pokeData.abilities)
+                const abilitiesCapitalized = Array.map(abilities, formatString)
+                abilitiesNode.textContent = 'Abilities: ' + join(abilitiesCapitalized, ', ')
+            const types = parseTypesArr(pokeData.types)
+                const typesUpper = Array.map(types, String.toUpperCase)
+                typeNode.textContent = join(typesUpper, ' | ')
+            const pokemonStats = pokeData.stats
+                makeStatsTable(statsNode, pokemonStats) // mutates statsNode
+
+            for (const pokeDataNode of Array.make(nameNode, spriteNode, typeNode, abilitiesNode, statsNode)) {
+                dataDisplayNode.appendChild(pokeDataNode)
+            }
+
+            root.appendChild(dataDisplayNode)
+
+            // root.append(statsNode)
+        })
+
+
+        for (const child of Array.make(header, textBox, searchButton)) {
+            root.appendChild(child)
         }
-    })
-    textBox.addEventListener('focusout', () => {
-        if (textBox.value === '')
-        {
-            textBox.value = textBox.defaultValue
-        }})
-
-    searchButton.addEventListener('click', async () => {
-        const pokemonName = textBox.value
-        const pokeData = await fetcher.fetchPokemonData(pokemonName)
-        nameNode.textContent = pokemonName
-        spriteNode.src = pokeData.sprites.front_default // url: string
-        const abilities = parseAbilitiesArr(pokeData.abilities)
-        const abilitiesCapitalized = Array.map(abilities, String.capitalize)
-        abilitiesNode.textContent = 'Abilities: ' + join(abilitiesCapitalized, ', ')
-        const types = parseTypesArr(pokeData.types)
-        const typesUpper = Array.map(types, String.toUpperCase)
-        typeNode.textContent = join(typesUpper, ' | ')
-        const pokemonStats = pokeData.stats
-        makeStatsTable(statsNode, pokemonStats) // mutates statsNode
-
-        for (const pokeDataNode of Array.make(nameNode, spriteNode, typeNode, abilitiesNode, statsNode)) {
-            dataDisplayNode.appendChild(pokeDataNode)
-        }
-
-        root.appendChild(dataDisplayNode)
-
-        // root.append(statsNode)
-    })
-
-
-    for (const child of Array.make(header, textBox, searchButton)) {
-        root.appendChild(child)
-    }
 
     const dataDisplayNode = document.createElement('pre') // preformatted
     // sprite, type, stats, abilities will depend on this node
@@ -112,6 +114,15 @@ function parseTypesArr(typesArr) {
     return res
 }
 
+function formatString(s: string): string {
+    // assumes non-formatted strings are all lowercaseand represent whitespaces as dashes
+    return pipe (
+        s,
+        String.replace('-', ' '),
+        String.capitalize
+    )
+}
+
 function makeStatsTable(tableNode: HTMLTableElement, pokeStats) {
     tableNode.innerHTML = '' // clear children
     let statToValue: HashMap.HashMap<string, number> = HashMap.empty()
@@ -147,13 +158,7 @@ function makeStatsTable(tableNode: HTMLTableElement, pokeStats) {
             const row = document.createElement('tr')
                 const statNameNode = document.createElement('th')
                 const statValNode = document.createElement('td')
-                statNameNode.textContent = ((s: string) => {
-                            return pipe (
-                            s,
-                            String.replace('-', ' '),
-                            String.capitalize
-                            )
-                        })(statName)
+                statNameNode.textContent = formatString(statName)
                 statValNode.textContent = `   ${statVal}   `
 
                 row.appendChild(statNameNode)
