@@ -113,6 +113,7 @@ function parseTypesArr(typesArr) {
 }
 
 function makeStatsTable(tableNode: HTMLTableElement, pokeStats) {
+    tableNode.innerHTML = '' // clear children
     let statToValue: HashMap.HashMap<string, number> = HashMap.empty()
 
     const statKeyCount = Array.length(pokeStats)
