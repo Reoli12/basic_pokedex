@@ -41,23 +41,34 @@ async function main() {
     const searchButton = document.createElement('button')
         searchButton.textContent = 'Search'
 
+    // at this point, this would be better expressed as a class.
+    let defaultSpriteSrc = String.empty
+    let shinySpriteSrc = String.empty
+
 
         searchButton.addEventListener('click', async () => {
             const pokemonName = textBox.value
             const pokeData = await fetcher.fetchPokemonData(pokemonName)
 
             nameNode.textContent = pokemonName
-            spriteNode.src = pokeData.sprites.front_default // url: string
+
+            defaultSpriteSrc = pokeData.sprites.front_default
+            shinySpriteSrc = pokeData.sprites.front_shiny
+            spriteNode.src = defaultSpriteSrc // url: string
+
             const abilities = parseAbilitiesArr(pokeData.abilities)
                 const abilitiesCapitalized = Array.map(abilities, formatString)
                 abilitiesNode.textContent = 'Abilities: ' + join(abilitiesCapitalized, ', ')
+
             const types = parseTypesArr(pokeData.types)
                 const typesUpper = Array.map(types, String.toUpperCase)
                 typeNode.textContent = join(typesUpper, ' | ')
+
             const pokemonStats = pokeData.stats
                 makeStatsTable(statsNode, pokemonStats) // mutates statsNode
 
-            for (const pokeDataNode of Array.make(nameNode, spriteNode, typeNode, abilitiesNode, statsNode)) {
+            for (const pokeDataNode of Array.make(  nameNode, spriteNode, displayShinyButtonNode,
+                                                    typeNode, abilitiesNode, statsNode)) {
                 dataDisplayNode.appendChild(pokeDataNode)
             }
 
@@ -73,6 +84,20 @@ async function main() {
 
     const dataDisplayNode = document.createElement('pre') // preformatted
     // sprite, type, stats, abilities will depend on this node
+
+    const displayShinyButtonNode = document.createElement('button')
+        displayShinyButtonNode.textContent = 'See shiny'
+        displayShinyButtonNode.addEventListener('click', () => {
+            if (String.isNonEmpty(defaultSpriteSrc) && String.isNonEmpty(shinySpriteSrc)) {
+                if (spriteNode.src === defaultSpriteSrc) {
+                    spriteNode.src = shinySpriteSrc
+                } else {
+                    spriteNode.src = defaultSpriteSrc
+                }
+            }
+        })
+    
+
 
     const nameNode = document.createElement('h2')
     const spriteNode = document.createElement('img')
