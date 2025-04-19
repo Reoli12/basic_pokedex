@@ -1,4 +1,4 @@
-import { Array, String } from 'effect'
+import { Array, String, HashMap, pipe } from 'effect'
 
 class PokeFetcher {
     url: string
@@ -17,7 +17,6 @@ class PokeFetcher {
 const delay = (ms: number) => new Promise((resolve) => {setTimeout(resolve, ms)})
 
 async function main() {
-    // const helper = new Pokedex()
     const url: string = 'https://pokeapi.co/api/v2/pokemon'
 
     const fetcher = new PokeFetcher(url)
@@ -53,12 +52,16 @@ async function main() {
         const types = parseTypesArr(pokeData.types)
         const typesUpper = Array.map(types, String.toUpperCase)
         typeNode.textContent = join(typesUpper, ' | ')
+        const pokemonStats = pokeData.stats
+        makeStatsTable(statsNode, pokemonStats) // mutates statsNode
 
-        for (const pokeDataNode of Array.make(nameNode, spriteNode, typeNode, abilitiesNode)) {
+        for (const pokeDataNode of Array.make(nameNode, spriteNode, typeNode, abilitiesNode, statsNode)) {
             dataDisplayNode.appendChild(pokeDataNode)
         }
 
         root.appendChild(dataDisplayNode)
+
+        // root.append(statsNode)
     })
 
 
@@ -72,7 +75,7 @@ async function main() {
     const nameNode = document.createElement('h2')
     const spriteNode = document.createElement('img')
     const typeNode = document.createElement('p')
-    const statsNode = document.createElement('div')
+    const statsNode = document.createElement('table')
     const abilitiesNode = document.createElement('p')
 }
 
@@ -94,7 +97,6 @@ function parseAbilitiesArr(abilitiesArray) {
     let res: Array<string> = Array.empty()
 
     for (const i of Array.range(0, arrLen - 1)) {
-        console.log(abilitiesArray[i])
         res = Array.append(res, abilitiesArray[i].ability.name) // idk why its structured like this
     }
     return res
@@ -105,10 +107,62 @@ function parseTypesArr(typesArr) {
     let res: Array<string> = Array.empty()
 
     for (const i of Array.range(0, arrLen - 1)) {
-        console.log(typesArr[i])
         res = Array.append(res, typesArr[i].type.name) // idk why its structured like this
     }
     return res
+}
+
+function makeStatsTable(tableNode: HTMLTableElement, pokeStats) {
+    let statToValue: HashMap.HashMap<string, number> = HashMap.empty()
+
+    const statKeyCount = Array.length(pokeStats)
+
+    for (const i of Array.range(0, statKeyCount - 1)) {
+        const statsObject = pokeStats[i]
+        const statName = statsObject.stat.name as string
+        const statVal = statsObject.base_stat as number
+
+        statToValue = HashMap.set(statToValue, statName, statVal)
+    }
+
+    // constructing table
+    const head = document.createElement('thead')
+        const topRow = document.createElement('tr') //tr = table row
+
+        // making header
+        for (const header of Array.make('Base stat', 'Value')) {
+            const headerCell = document.createElement('th')
+            headerCell.textContent = header
+            headerCell.scope = 'col'
+            topRow.appendChild(headerCell)
+        }
+        head.appendChild(topRow)
+
+        // making body
+    const body = document.createElement('tbody')
+        for (const [statName, statVal] of HashMap.entries(statToValue)) {
+            console.log([statName, statVal])
+            // statname on left col, statval on right
+            const row = document.createElement('tr')
+                const statNameNode = document.createElement('th')
+                const statValNode = document.createElement('td')
+                statNameNode.textContent = ((s: string) => {
+                            return pipe (
+                            s,
+                            String.replace('-', ' '),
+                            String.capitalize
+                            )
+                        })(statName)
+                statValNode.textContent = `   ${statVal}   `
+
+                row.appendChild(statNameNode)
+                row.appendChild(statValNode)
+            body.appendChild(row)
+        }
+    for (const child of Array.make(head, body)) {
+        console.log(child)
+        tableNode.append(child)
+    }
 }
 
 main()
