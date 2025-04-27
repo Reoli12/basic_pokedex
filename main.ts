@@ -1,5 +1,4 @@
 import { Array, String, HashMap, pipe } from 'effect'
-import { format } from 'effect/Duration'
 
 class PokeFetcher {
     url: string
@@ -15,7 +14,7 @@ class PokeFetcher {
     }
 }
 
-const delay = (ms: number) => new Promise((resolve) => {setTimeout(resolve, ms)})
+// const delay = (ms: number) => new Promise((resolve) => {setTimeout(resolve, ms)})
 
 async function main() {
     const url: string = 'https://pokeapi.co/api/v2/pokemon'
