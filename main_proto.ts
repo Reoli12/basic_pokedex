@@ -1,4 +1,5 @@
-import { Array, String, HashMap, pipe, Match } from 'effect'
+import { Array, String, HashMap, Match } from 'effect'
+import { pipe } from "@effect/data/Function"
 
 class PokeFetcher {
     url: string
@@ -75,6 +76,8 @@ class Pokedex {
     }
 
     async searchPokemon() {
+        this.PokeInfoNodes.innerHTML = ''
+
         console.log(`i ran: ${this.textBox.value}`)
         const pokemonName = String.toLowerCase(this.textBox.value)
         const pokeData = await this.fetcher.fetchPokemonData(pokemonName)
@@ -83,8 +86,52 @@ class Pokedex {
             this.shinySpriteSrc = pokeData.sprites.front_shiny
             this.defaultSpriteSrc = pokeData.sprites.front_default
         this.spriteNode.src = this.defaultSpriteSrc
+
+        const pokeAbilitiesRaw = pokeData.abilities
+        const pokeAbilities = this.parseAbilitiesArr(pokeAbilitiesRaw)
+        this.abilitiesNode.textContent = pipe (
+                                        pokeAbilities,
+                                        Array.map((ability) => this.formatString(ability)),
+                                        (formattedAbilities) => this.join(formattedAbilities, ', ')
+                                    )
+                                        
+        for (const child of this.PokeInfoNodesArray) {
+            this.PokeInfoNodes.appendChild(child)
+        }
         this.view.showElement(this.PokeInfoNodes)
 
+    }
+
+    parseAbilitiesArr(abilitiesArray) {
+        const arrLen = Array.length(abilitiesArray)
+        let res: Array<string> = Array.empty()
+    
+        for (const i of Array.range(0, arrLen - 1)) {
+            res = Array.append(res, abilitiesArray[i].ability.name) // idk why its structured like this
+        }
+        return res
+    }
+
+    formatString(s: string): string {
+        // assumes non-formatted strings are all lowercaseand represent whitespaces as dashes
+        return pipe (
+            s,
+            String.replace('-', ' '),
+            String.capitalize
+        )
+    }
+
+    join(strList: string[], separator: string): string {
+        let res = ''
+        for (const elem of strList) {
+            if (res === '' ) {
+                res += elem
+            } 
+            else {
+                res = `${res}${separator}${elem}`
+            }
+        }
+        return res
     }
 }
 
