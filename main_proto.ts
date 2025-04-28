@@ -65,6 +65,7 @@ class Pokedex {
         this.header.textContent = 'pokedex beta'
         this.searchButton.textContent = 'Search!'
         this.seeShinyButton.textContent = 'See Shiny'
+        this.textBox.defaultValue = 'search Pokemon here'
 
         for (const child of Array.make(this.spriteImg, this.seeShinyButton)) {
             this.spriteNode.appendChild(child)
@@ -81,6 +82,16 @@ class Pokedex {
 
         // event listeners
         this.searchButton.addEventListener('click', () => this.searchPokemon())
+        this.textBox.addEventListener('click', () => {
+            if (this.textBox.value === this.textBox.defaultValue) {
+                this.textBox.value = ''
+            }
+        })
+        this.textBox.addEventListener('focusout', () => {
+            if (this.textBox.value === '') {
+                this.textBox.value = this.textBox.defaultValue
+            }
+        })
         this.seeShinyButton.addEventListener('click', () => this.showOppositeShinyState())
     }
 
