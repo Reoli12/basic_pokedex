@@ -126,6 +126,10 @@ class Pokedex {
                                                                 this.join(formattedAbilities, ', ')
                                     )
                                         
+        const types = this.parseTypesArr(pokeData.types)
+            const typesUpper = Array.map(types, String.toUpperCase)
+            this.typeNode.textContent = this.join(typesUpper, ' | ')
+
         for (const child of this.PokeInfoNodesArray) {
             this.PokeInfoNodes.appendChild(child)
         }
@@ -161,6 +165,16 @@ class Pokedex {
             else {
                 res = `${res}${separator}${elem}`
             }
+        }
+        return res
+    }
+
+    parseTypesArr(typesArr) {
+        const arrLen = Array.length(typesArr)
+        let res: Array<string> = Array.empty()
+    
+        for (const i of Array.range(0, arrLen - 1)) {
+            res = Array.append(res, typesArr[i].type.name) // idk why its structured like this
         }
         return res
     }
