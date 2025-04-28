@@ -41,9 +41,11 @@ class Pokedex {
 
     PokeInfoNodes = document.createElement('div')
         nameNode = document.createElement('h2')
-        spriteNode = document.createElement('img')
+        spriteNode = document.createElement('div')
+            spriteImg = document.createElement('img')
             defaultSpriteSrc: string
             shinySpriteSrc: string
+            seeShinyButton = document.createElement('button')
         typeNode = document.createElement('p')
         statsNode = document.createElement('table')
         abilitiesNode = document.createElement('p')
@@ -59,8 +61,14 @@ class Pokedex {
         this.fetcher = fetcher
         this.view = view
 
+        // setting default textContents
         this.header.textContent = 'pokedex beta'
         this.searchButton.textContent = 'Search!'
+        this.seeShinyButton.textContent = 'See Shiny'
+
+        for (const child of Array.make(this.spriteImg, this.seeShinyButton)) {
+            this.spriteNode.appendChild(child)
+        }
 
         for (const child of this.basicNodesArray) {
             this.basicNodes.appendChild(child)
@@ -73,6 +81,18 @@ class Pokedex {
 
         // event listeners
         this.searchButton.addEventListener('click', () => this.searchPokemon())
+        this.seeShinyButton.addEventListener('click', () => this.showOppositeShinyState())
+    }
+
+    showOppositeShinyState() {
+        if (this.spriteImg.src === '') {
+            return
+        }
+        if (this.spriteImg.src === this.defaultSpriteSrc) {
+            this.spriteImg.src = this.shinySpriteSrc
+        } else {
+            this.spriteImg.src = this.defaultSpriteSrc
+        }
     }
 
     async searchPokemon() {
@@ -83,16 +103,16 @@ class Pokedex {
         const pokeData = await this.fetcher.fetchPokemonData(pokemonName)
         this.nameNode.textContent = pokemonName
         
-            this.shinySpriteSrc = pokeData.sprites.front_shiny
-            this.defaultSpriteSrc = pokeData.sprites.front_default
-        this.spriteNode.src = this.defaultSpriteSrc
-
+        this.shinySpriteSrc = pokeData.sprites.front_shiny
+        this.defaultSpriteSrc = pokeData.sprites.front_default
+        this.spriteImg.src = this.defaultSpriteSrc
         const pokeAbilitiesRaw = pokeData.abilities
         const pokeAbilities = this.parseAbilitiesArr(pokeAbilitiesRaw)
         this.abilitiesNode.textContent = pipe (
                                         pokeAbilities,
                                         Array.map((ability) => this.formatString(ability)),
-                                        (formattedAbilities) => this.join(formattedAbilities, ', ')
+                                        (formattedAbilities) => 'Abilities: ' + 
+                                                                this.join(formattedAbilities, ', ')
                                     )
                                         
         for (const child of this.PokeInfoNodesArray) {
